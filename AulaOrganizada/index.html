@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AulaOrganizada</title>
+    <link rel="stylesheet" href="estilos.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="dark-mode">
+
+    <!-- LOGIN / REGISTRO -->
+    <div id="pantalla-registro" class="pantalla-login" style="display: none;">
+        <div class="tarjeta-login">
+            <div class="icono-app-login">✨</div>
+            <h1>AulaOrganizada</h1>
+            <p>Ingresa para comenzar a organizar tus tareas y trabajos.</p>
+            
+            <form id="formulario-usuario">
+                <div class="campo">
+                    <label for="nombre-usuario">Nombre</label>
+                    <input type="text" id="nombre-usuario" placeholder="Ej: Misael Llerena" required>
+                </div>
+                <div class="campo">
+                    <label for="correo-usuario">Correo electrónico</label>
+                    <input type="email" id="correo-usuario" placeholder="correo@ejemplo.com" required>
+                </div>
+                <button type="submit" class="btn-principal">Ingresar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div id="pantalla-app" class="contenedor-app">
+        
+        <header class="barra-superior">
+            <div class="header-info">
+                <h1 id="titulo-seccion">Hoy</h1>
+            </div>
+            
+            <div class="perfil-contenedor">
+                <button id="btn-avatar" class="avatar-btn" type="button">
+                    <span id="avatar-inicial">A</span>
+                </button>
+                
+                <div id="menu-perfil" class="menu-desplegable" style="display: none;">
+                    <div class="info-perfil-menu">
+                        <strong id="menu-nombre-usuario">Usuario</strong>
+                        <small id="menu-correo-usuario">correo@ejemplo.com</small>
+                    </div>
+                    <div class="separador"></div>
+                    <button id="btn-cambiar-usuario" class="item-menu" type="button">🔄 Cambiar de usuario</button>
+                    <button id="btn-borrar-cuenta" class="item-menu peligro" type="button">🗑️ Borrar cuenta y datos</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- SECCIÓN 1: HOY -->
+        <section id="vista-hoy" class="vista-tab">
+            <div class="selector-fechas" id="contenedor-fechas"></div>
+            <div class="contenedor-lista" id="lista-hoy"></div>
+        </section>
+
+        <!-- SECCIÓN 2: PENDIENTES -->
+        <section id="vista-tareas" class="vista-tab" style="display: none;">
+            <div class="seccion-titulo-caja">
+                <h2>Mis Tareas y Trabajos Pendientes</h2>
+            </div>
+            <div class="contenedor-lista" id="lista-tareas-pendientes"></div>
+        </section>
+
+        <!-- BOTÓN FLOTANTE (+) -->
+        <button id="btn-flotante-agregar" class="btn-fab" type="button">
+            <span>+</span>
+        </button>
+
+        <!-- BARRA DE NAVEGACIÓN INFERIOR -->
+        <nav class="sub-menu-inferior">
+            <button class="nav-item activo" onclick="cambiarTab('vista-hoy', this, 'Hoy')" type="button">
+                <span class="nav-icono">📅</span>
+                <span class="nav-texto">Hoy</span>
+            </button>
+            <button class="nav-item" onclick="cambiarTab('vista-tareas', this, 'Pendientes')" type="button">
+                <span class="nav-icono">📝</span>
+                <span class="nav-texto">Pendientes</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <!-- MODAL SELECCIÓN DE TIPO DE ELEMENTO (+) -->
+    <div id="modal-menu-crear" class="modal-fondo" style="display: none;" onclick="cerrarMenuOpcionesCrear()">
+        <div class="modal-contenido bottom-sheet-contenido" onclick="event.stopPropagation()">
+            <div class="opcion-tipo-item" onclick="seleccionarTipoElemento('tarea')">
+                <div class="icono-tipo-box morado">📝</div>
+                <div class="info-tipo-box">
+                    <strong>Tarea</strong>
+                    <p>Se muestra todos los días con su conteo de días y entrega límite.</p>
+                </div>
+            </div>
+
+            <div class="opcion-tipo-item" onclick="seleccionarTipoElemento('trabajo')">
+                <div class="icono-tipo-box rojo">📌</div>
+                <div class="info-tipo-box">
+                    <strong>Trabajo / Proyecto</strong>
+                    <p>Actividad o entrega para una fecha específica.</p>
+                </div>
+            </div>
+
+            <button type="button" class="btn-secundario btn-full" onclick="cerrarMenuOpcionesCrear()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- FORMULARIO (+) TRABAJO / PROYECTO -->
+    <div id="modal-crear-tarea-simple" class="modal-fondo" style="display: none;" onclick="cerrarCrearTareaSimple()">
+        <div class="modal-contenido modal-scrollable" onclick="event.stopPropagation()">
+            <h3>Nuevo Trabajo / Proyecto</h3>
+            
+            <div class="campo">
+                <label for="simple-nombre">Trabajo / Proyecto</label>
+                <input type="text" id="simple-nombre" placeholder="Ej: Entregar maqueta" required>
+            </div>
+
+            <div class="campo">
+                <label for="simple-materia">Categoría / Curso</label>
+                <select id="simple-materia" onchange="toggleOtroCursoSimple()">
+                    <option value="📐 Matemática">📐 Matemática</option>
+                    <option value="📚 Comunicación">📚 Comunicación</option>
+                    <option value="🏛 Ciencias Sociales">🏛 Ciencias Sociales</option>
+                    <option value="🔬 Ciencia y Tecnología">🔬 Ciencia y Tecnología</option>
+                    <option value="🌍 Geografía">🌍 Geografía</option>
+                    <option value="✖️ Álgebra">✖️ Álgebra</option>
+                    <option value="🔢 Aritmética">🔢 Aritmética</option>
+                    <option value="📐 Geometría">📐 Geometría</option>
+                    <option value="🔤 Inglés">🔤 Inglés</option>
+                    <option value="🗣 Lenguas">🗣 Lenguas</option>
+                    <option value="📜 Historia">📜 Historia</option>
+                    <option value="📊 Economía">📊 Economía</option>
+                    <option value="OTRO">✏️ Otro curso</option>
+                </select>
+            </div>
+
+            <div class="campo" id="contenedor-otro-curso-simple" style="display: none;">
+                <label for="simple-otro-curso-input">Escribe el curso:</label>
+                <input type="text" id="simple-otro-curso-input" placeholder="Ej: 🧪 Química Orgánica">
+            </div>
+
+            <div class="campo">
+                <label for="simple-fecha">Fecha de entrega</label>
+                <input type="date" id="simple-fecha">
+            </div>
+
+            <div class="campo">
+                <label>Hora y recordatorio</label>
+                <div class="grid-hora-12">
+                    <input type="text" id="simple-hora-num" maxlength="2" value="12" placeholder="12" onblur="formatearMinutosHoras(this, 1, 12)">
+                    <span>:</span>
+                    <input type="text" id="simple-min-num" maxlength="2" value="00" placeholder="00" onblur="formatearMinutosHoras(this, 0, 59)">
+                    <select id="simple-ampm">
+                        <option value="AM">AM</option>
+                        <option value="PM" selected>PM</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="campo">
+                <label for="simple-prioridad">Prioridad</label>
+                <select id="simple-prioridad">
+                    <option value="Baja">Baja 🟢</option>
+                    <option value="Normal" selected>Normal 🟡</option>
+                    <option value="Alta">Alta 🔴</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="simple-nota">Nota (opcional)</label>
+                <textarea id="simple-nota" class="textarea-auto-expand" placeholder="Añadir observaciones o detalles..." oninput="autoExpandirNota(this)"></textarea>
+            </div>
+
+            <div class="modal-acciones">
+                <button type="button" class="btn-secundario" onclick="cerrarCrearTareaSimple()">Cancelar</button>
+                <button type="button" class="btn-principal" onclick="guardarTareaSimple()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DETALLE ITEM -->
+    <div id="modal-detalle-item" class="modal-fondo" style="display: none;" onclick="cerrarDetalleItem()">
+        <div class="modal-contenido bottom-sheet-contenido" onclick="event.stopPropagation()">
+            
+            <button type="button" class="btn-cerrar-modal" onclick="cerrarDetalleItem()">✕</button>
+
+            <div class="header-detalle-item">
+                <div>
+                    <h3 id="det-titulo">Nombre Tarea</h3>
+                    <span id="det-fecha-tag" class="tag-fecha-azul">2026-10-17</span>
+                </div>
+                <div id="det-icono-materia" class="icono-materia-badge">📚</div>
+            </div>
+
+            <div class="grid-estado-logrado">
+                <button type="button" id="btn-estado-pendiente" class="btn-estado-box activo" onclick="marcarEstadoDesdeModal('pendiente')">
+                    <span class="circulo-estado celeste"></span>
+                    <span>Pendiente</span>
+                </button>
+                <button type="button" id="btn-estado-logrado" class="btn-estado-box" onclick="marcarEstadoDesdeModal('logrado')">
+                    <span class="circulo-estado verde">✓</span>
+                    <span>Logrado</span>
+                </button>
+            </div>
+
+            <div class="lista-acciones-detalle">
+                <button type="button" class="btn-accion-item" onclick="abrirConfigRecordatorio()">
+                    <span>⏰</span> Recordatorios <small id="det-hora-txt" style="margin-left: auto; opacity: 0.7;">Sin hora</small>
+                </button>
+                <button type="button" class="btn-accion-item" onclick="abrirReprogramarFecha()">
+                    <span>🔄</span> Reprogramar
+                </button>
+                <button type="button" class="btn-accion-item" onclick="omitirTareaHoy()">
+                    <span>🚫</span> Omitir
+                </button>
+            </div>
+
+            <div class="footer-acciones-detalle">
+                <button type="button" class="btn-icono-footer" onclick="abrirEditarPantallaCompleta()">✏️</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL CONFIGURACIÓN RECORDATORIO -->
+    <div id="modal-config-recordatorio" class="modal-fondo" style="display: none;" onclick="cerrarConfigRecordatorio()">
+        <div class="modal-contenido" onclick="event.stopPropagation()">
+            <h3 class="text-center">Nuevo recordatorio</h3>
+            
+            <div class="campo">
+                <label>Hora del recordatorio</label>
+                <div class="grid-hora-12">
+                    <input type="text" id="rec-hora-num" maxlength="2" value="12" onblur="formatearMinutosHoras(this, 1, 12)">
+                    <span>:</span>
+                    <input type="text" id="rec-min-num" maxlength="2" value="00" onblur="formatearMinutosHoras(this, 0, 59)">
+                    <select id="rec-ampm">
+                        <option value="AM">AM</option>
+                        <option value="PM" selected>PM</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="campo">
+                <label>Tipo de recordatorio</label>
+                <div class="grid-tipo-rec">
+                    <button type="button" id="btn-rec-alarma" class="btn-tipo-rec activo" onclick="seleccionarTipoRec('alarma')">🔔 Alarma</button>
+                    <button type="button" id="btn-rec-notif" class="btn-tipo-rec" onclick="seleccionarTipoRec('notificacion')">💬 Notificación</button>
+                </div>
+            </div>
+
+            <div class="modal-acciones">
+                <button type="button" class="btn-secundario" onclick="cerrarConfigRecordatorio()">Cancelar</button>
+                <button type="button" class="btn-principal" onclick="guardarNuevoRecordatorio()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL REPROGRAMAR FECHA -->
+    <div id="modal-reprogramar" class="modal-fondo" style="display: none;" onclick="cerrarReprogramar()">
+        <div class="modal-contenido text-center" onclick="event.stopPropagation()">
+            <h3>Reprogramar fecha inicio</h3>
+            <div class="campo" style="margin: 15px 0;">
+                <input type="date" id="input-nueva-fecha-reprogramar" style="font-size: 1rem; padding: 10px; text-align: center;">
+            </div>
+            <div class="modal-acciones">
+                <button type="button" class="btn-secundario" onclick="cerrarReprogramar()">Cancelar</button>
+                <button type="button" class="btn-principal" onclick="confirmarReprogramar()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR COMPLETO Y BORRAR -->
+    <div id="modal-editar-completo" class="modal-fondo" style="display: none;" onclick="cerrarEditarCompleto()">
+        <div class="modal-contenido modal-scrollable" onclick="event.stopPropagation()">
+            <h3>✏️ Editar tarea</h3>
+            <div class="campo">
+                <label for="edit-nombre-input">Nombre</label>
+                <input type="text" id="edit-nombre-input">
+            </div>
+            <div class="campo">
+                <label for="edit-nota-input">Nota</label>
+                <textarea id="edit-nota-input" class="textarea-auto-expand" oninput="autoExpandirNota(this)"></textarea>
+            </div>
+            <div class="campo">
+                <label for="edit-prioridad-select">Prioridad</label>
+                <select id="edit-prioridad-select">
+                    <option value="Baja">Baja 🟢</option>
+                    <option value="Normal">Normal 🟡</option>
+                    <option value="Alta">Alta 🔴</option>
+                </select>
+            </div>
+
+            <div class="modal-acciones">
+                <button type="button" class="btn-secundario peligro" onclick="borrarTareaDesdeModal()" style="background-color: var(--danger-red);">🗑 Eliminar</button>
+                <button type="button" class="btn-principal" onclick="guardarEdicionCompleta()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WIZARD CREACIÓN DE TAREA -->
+    <div id="modal-wizard" class="modal-fondo" style="display: none;" onclick="cerrarModalWizard()">
+        <div class="modal-contenido wizard-contenido modal-scrollable" onclick="event.stopPropagation()">
+            
+            <div class="wizard-pasos-indicador">
+                <span class="paso-dot activo" id="dot-paso-1"></span>
+                <span class="paso-dot" id="dot-paso-2"></span>
+                <span class="paso-dot" id="dot-paso-3"></span>
+                <span class="paso-dot" id="dot-paso-4"></span>
+            </div>
+
+            <!-- PASO 1 -->
+            <div id="paso-1" class="wizard-paso-box">
+                <h3 class="paso-titulo">Define tu tarea</h3>
+                <div class="campo">
+                    <label for="wiz-nombre">Nombre de la Tarea</label>
+                    <input type="text" id="wiz-nombre" placeholder="Ej: Resolver guía de ejercicios" required>
+                </div>
+                <div class="campo">
+                    <label for="wiz-nota">Nota (opcional)</label>
+                    <textarea id="wiz-nota" class="textarea-auto-expand" placeholder="Añadir observaciones o detalles..." oninput="autoExpandirNota(this)"></textarea>
+                </div>
+            </div>
+
+            <!-- PASO 2 -->
+            <div id="paso-2" class="wizard-paso-box" style="display: none;">
+                <h3 class="paso-titulo">Selecciona una categoría</h3>
+                <div class="grid-categorias-materias">
+                    <button type="button" class="item-materia-btn seleccionado" onclick="seleccionarMateria(this, '📐 Matemática')">📐 Matemática</button>
+                    <button type="button" class="item-materia-btn" onclick="seleccionarMateria(this, '📚 Comunicación')">📚 Comunicación</button>
+                    <button type="button" class="item-materia-btn" onclick="seleccionarMateria(this, '🏛 Ciencias Sociales')">🏛 Ciencias Sociales</button>
+                    <button type="button" class="item-materia-btn" onclick="seleccionarMateria(this, '🔬 Ciencia y Tecnología')">🔬 Ciencia y Tecnología</button>
+                    <button type="button" class="item-materia-btn" onclick="seleccionarMateria(this, '🌍 Geografía')">🌍 Geografía</button>
+                    <button type="button" class="item-materia-btn" onclick="seleccionarMateria(this, '✖️ Álgebra')">✖️ Álgebra</button>
+                    <button type="button" class="item-materia-btn" onclick="seleccionarMateria(this, '🔢 Aritmética')">🔢 Aritmética</button>
+                    <button type="button" class="item-materia-btn" onclick="seleccionarMateria(this, '📐 Geometría')">📐 Geometría</button>
+                    <button type="button" class="item-materia-btn" onclick="seleccionarMateria(this, '🔤 Inglés')">🔤 Inglés</button>
+                    <button type="button" class="item-materia-btn" onclick="seleccionarMateria(this, '🗣 Lenguas')">🗣 Lenguas</button>
+                    <button type="button" class="item-materia-btn" onclick="seleccionarMateria(this, '📜 Historia')">📜 Historia</button>
+                    <button type="button" class="item-materia-btn" onclick="seleccionarMateria(this, '📊 Economía')">📊 Economía</option>
+                    <button type="button" class="item-materia-btn" onclick="seleccionarMateria(this, 'OTRO')">✏️ Otro curso</option>
+                </div>
+
+                <div class="campo" id="contenedor-otro-curso" style="display: none; margin-top: 12px;">
+                    <label for="wiz-otro-curso-input">Escribe el nombre del curso:</label>
+                    <input type="text" id="wiz-otro-curso-input" placeholder="Ej: 🧪 Química Orgánica">
+                </div>
+            </div>
+
+            <!-- PASO 3 -->
+            <div id="paso-3" class="wizard-paso-box" style="display: none;">
+                <h3 class="paso-titulo">¿Con qué frecuencia quieres realizarlo?</h3>
+                <div class="lista-opciones-frecuencia">
+                    <label class="opcion-radio">
+                        <input type="radio" name="wiz-frecuencia" value="diario" checked onclick="toggleOpcionesFrecuencia('diario')">
+                        Tarea pendiente (Todos los días hasta la entrega)
+                    </label>
+
+                    <label class="opcion-radio">
+                        <input type="radio" name="wiz-frecuencia" value="semanal" onclick="toggleOpcionesFrecuencia('semanal')">
+                        Días específicos de la semana
+                    </label>
+
+                    <div id="desplegable-dias-semana" class="subopciones-box" style="display: none;">
+                        <div class="grid-dias-semana">
+                            <label><input type="checkbox" value="1" class="check-dia-sem"> Lunes</label>
+                            <label><input type="checkbox" value="2" class="check-dia-sem"> Martes</label>
+                            <label><input type="checkbox" value="3" class="check-dia-sem"> Miércoles</label>
+                            <label><input type="checkbox" value="4" class="check-dia-sem"> Jueves</label>
+                            <label><input type="checkbox" value="5" class="check-dia-sem"> Viernes</label>
+                            <label><input type="checkbox" value="6" class="check-dia-sem"> Sábado</label>
+                            <label><input type="checkbox" value="0" class="check-dia-sem"> Domingo</label>
+                        </div>
+                    </div>
+
+                    <label class="opcion-radio">
+                        <input type="radio" name="wiz-frecuencia" value="mensual" onclick="toggleOpcionesFrecuencia('mensual')">
+                        Días específicos del mes
+                    </label>
+
+                    <div id="desplegable-dias-mes" class="subopciones-box" style="display: none;">
+                        <span class="subtit-mini">Selecciona los días del mes:</span>
+                        <div class="grid-dias-mes" id="grid-dias-mes-contenedor"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASO 4 -->
+            <div id="paso-4" class="wizard-paso-box" style="display: none;">
+                <h3 class="paso-titulo">¿Cuándo quieres hacerlo?</h3>
+                
+                <div class="campo">
+                    <label for="wiz-fecha-inicio">Fecha de inicio</label>
+                    <input type="date" id="wiz-fecha-inicio" onchange="actualizarDiasDesdeFechaFin()">
+                </div>
+
+                <div class="campo-switch-box">
+                    <div class="switch-header">
+                        <label for="wiz-switch-fin">Fecha de fin</label>
+                        <label class="switch-toggle">
+                            <input type="checkbox" id="wiz-switch-fin" checked onchange="toggleSwitchFechaFin()">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+
+                    <div id="contenedor-campos-fin" style="display: block; margin-top: 10px;">
+                        <div class="grid-fin-dias">
+                            <div>
+                                <label for="wiz-fecha-fin" style="font-size: 0.75rem;">Fecha límite</label>
+                                <input type="date" id="wiz-fecha-fin" onchange="actualizarDiasDesdeFechaFin()">
+                            </div>
+                            <div>
+                                <label for="wiz-dias-duracion" style="font-size: 0.75rem;">Días</label>
+                                <div class="caja-dias-input">
+                                    <input type="number" id="wiz-dias-duracion" value="1" min="1" oninput="actualizarFechaFinDesdeDias()">
+                                    <span>días.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="campo">
+                    <label>Hora y recordatorio</label>
+                    <div class="grid-hora-12">
+                        <input type="text" id="wiz-hora-num" maxlength="2" value="12" onblur="formatearMinutosHoras(this, 1, 12)">
+                        <span>:</span>
+                        <input type="text" id="wiz-min-num" maxlength="2" value="00" onblur="formatearMinutosHoras(this, 0, 59)">
+                        <select id="wiz-ampm">
+                            <option value="AM">AM</option>
+                            <option value="PM" selected>PM</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="campo">
+                    <label for="wiz-prioridad">Prioridad</label>
+                    <select id="wiz-prioridad">
+                        <option value="Baja">Baja 🟢</option>
+                        <option value="Normal" selected>Normal 🟡</option>
+                        <option value="Alta">Alta 🔴</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="wizard-footer-acciones">
+                <button type="button" id="btn-wiz-anterior" onclick="moverWizard(-1)" class="btn-secundario">Cancelar</button>
+                <button type="button" id="btn-wiz-siguiente" onclick="moverWizard(1)" class="btn-principal">Siguiente</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
