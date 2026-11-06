@@ -1,4 +1,15 @@
-// UI
+// Registrar el Service Worker correctamente para GitHub Pages
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => {
+                console.log('Service Worker registrado correctamente en GitHub Pages:', reg.scope);
+            })
+            .catch(err => {
+                console.error('Error al registrar el Service Worker:', err);
+            });
+    });
+}// UI
 const pantallaRegistro = document.getElementById('pantalla-registro');
 const pantallaApp = document.getElementById('pantalla-app');
 const tituloSeccion = document.getElementById('titulo-seccion');
@@ -708,19 +719,6 @@ function guardarEdicionCompleta() {
     renderizarTodo();
 }
 
-function sonarAlarmaBeep() {
-    try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); osc.stop(audioCtx.currentTime + 1.2);
-    } catch (e) {}
-}
-
 function comprobarRecordatoriosAlarmas() {
     const ahora = new Date();
     let horas = ahora.getHours();
@@ -736,25 +734,32 @@ function comprobarRecordatoriosAlarmas() {
             if (!sessionStorage.getItem(keyNotif)) {
                 sessionStorage.setItem(keyNotif, 'true');
 
-                if (t.tipoRecordatorio === 'alarma') {
+                const esAlarma = (t.tipoRecordatorio === 'alarma');
+
+                if (esAlarma) {
                     sonarAlarmaBeep();
-                    if ("vibrate" in navigator) navigator.vibrate([200, 100, 200, 100, 200]);
-                    alert(`⏰ ALARMA: No te olvides de tu tarea "${t.nombre}" (${t.curso})`);
+                    if ("vibrate" in navigator) navigator.vibrate([500, 200, 500, 200, 500]);
+                }
+
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({
+                        type: 'MOSTRAR_NOTIFICACION',
+                        titulo: esAlarma ? `⏰ ALARMA: ${t.nombre}` : `💬 Recordatorio: ${t.nombre}`,
+                        cuerpo: `Curso: ${t.curso} - ¡No lo olvides!`,
+                        esAlarma: esAlarma
+                    });
+                } else if ("Notification" in window && Notification.permission === "granted") {
+                    new Notification(esAlarma ? `⏰ ALARMA: ${t.nombre}` : `💬 Recordatorio: ${t.nombre}`, {
+                        body: `Curso: ${t.curso}`,
+                        icon: "✨"
+                    });
                 } else {
-                    if ("Notification" in window && Notification.permission === "granted") {
-                        new Notification("AulaOrganizada", {
-                            body: `No te olvides de tu tarea: ${t.nombre}`,
-                            icon: "✨"
-                        });
-                    } else {
-                        alert(`💬 Notificación: No te olvides de tu tarea "${t.nombre}"`);
-                    }
+                    alert(`${esAlarma ? '⏰ ALARMA' : '💬 Notificación'}: "${t.nombre}" (${t.curso})`);
                 }
             }
         }
     });
 }
-
 // Perfil
 btnAvatar.addEventListener('click', (e) => {
     e.stopPropagation();
