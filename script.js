@@ -1,3 +1,15 @@
+// Registrar el Service Worker correctamente para GitHub Pages
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => {
+                console.log('Service Worker registrado correctamente en GitHub Pages:', reg.scope);
+            })
+            .catch(err => {
+                console.error('Error al registrar el Service Worker:', err);
+            });
+    });
+}
 // UI
 const pantallaRegistro = document.getElementById('pantalla-registro');
 const pantallaApp = document.getElementById('pantalla-app');
